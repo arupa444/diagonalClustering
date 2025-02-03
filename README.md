@@ -1,5 +1,4 @@
-# diagonalClustering
-Diagonal Clustering 
+# Jagged Diagonal Storage
 
 
 ### **Practical Storage Calculation for Jagged Diagonal Storage (JDS)**  
