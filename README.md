@@ -51,7 +51,7 @@ Consider a **4 × 5 sparse matrix** with **9 non-zero elements**:
 👉 **JDS offers efficient storage while optimizing sparse matrix-vector multiplications (SpMV), particularly in GPU applications.**  
 
 
-# Jagged Diagonal Storage
+# Packed Diagonal Storage
 
 Packed Diagonal Storage (PDS) is a compact way to store banded matrices efficiently by only storing the nonzero diagonals. This is useful in scientific computing and numerical linear algebra, where large sparse matrices appear frequently.  
 
