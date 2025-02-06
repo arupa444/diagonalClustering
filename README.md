@@ -50,4 +50,53 @@ Consider a **4 × 5 sparse matrix** with **9 non-zero elements**:
 
 👉 **JDS offers efficient storage while optimizing sparse matrix-vector multiplications (SpMV), particularly in GPU applications.**  
 
-Would you like an implementation example in C or Python? 🚀
+
+# Jagged Diagonal Storage
+
+Packed Diagonal Storage (PDS) is a compact way to store banded matrices efficiently by only storing the nonzero diagonals. This is useful in scientific computing and numerical linear algebra, where large sparse matrices appear frequently.  
+
+### **Structure of Packed Diagonal Storage (PDS)**
+For an \( n \times n \) band matrix with a bandwidth of \( w \), only the diagonals within the bandwidth are stored. These diagonals are packed into a 2D array, reducing memory usage compared to full matrix storage.
+
+If we define:
+- **\( l \)**: Number of subdiagonals (below the main diagonal)
+- **\( u \)**: Number of superdiagonals (above the main diagonal)
+- The **bandwidth** is \( l + u + 1 \), which is the number of diagonals stored.
+
+### **Storage Format**
+A band matrix is stored in a 2D array of size \( (l + u + 1) \times n \), where:
+- Each **row** represents a diagonal.
+- The **main diagonal** is in the middle row.
+- Superdiagonals are stored in upper rows.
+- Subdiagonals are stored in lower rows.
+
+For example, consider a \( 5 \times 5 \) matrix with bandwidth 3 (one subdiagonal, main diagonal, and one superdiagonal):
+
+\[
+\begin{bmatrix}
+a_{1,1} & a_{1,2} & 0      & 0      & 0 \\
+a_{2,1} & a_{2,2} & a_{2,3} & 0      & 0 \\
+0      & a_{3,2} & a_{3,3} & a_{3,4} & 0 \\
+0      & 0      & a_{4,3} & a_{4,4} & a_{4,5} \\
+0      & 0      & 0      & a_{5,4} & a_{5,5}
+\end{bmatrix}
+\]
+
+The **Packed Diagonal Storage (PDS) format** will be:
+
+\[
+\begin{bmatrix}
+*    & a_{1,2} & a_{2,3} & a_{3,4} & a_{4,5} \\
+a_{1,1} & a_{2,2} & a_{3,3} & a_{4,4} & a_{5,5} \\
+a_{2,1} & a_{3,2} & a_{4,3} & a_{5,4} & *   
+\end{bmatrix}
+\]
+
+Here, `*` represents unused space.
+
+### **Advantages of PDS**
+- **Memory Efficient**: Avoids storing unnecessary zero elements.
+- **Better Performance**: Useful for matrix operations in iterative solvers (e.g., LU decomposition, Gauss-Seidel method).
+- **Cache-Friendly**: Improves cache locality in numerical computations.
+
+Would you like an implementation in C or Python for handling Packed Diagonal Storage?
