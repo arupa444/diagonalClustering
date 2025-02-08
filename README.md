@@ -100,57 +100,89 @@ Here, `*` represents unused space.
 - **Cache-Friendly**: Improves cache locality in numerical computations.
 
 
-# Block Compressed Row Storage
+# Block Compressed Row Storage (BCRS)
 
-Block Compressed Row Storage (BCRS) is a sparse matrix storage format that extends the **Compressed Row Storage (CRS/CSR)** format by grouping matrix elements into small dense blocks. This improves cache efficiency and performance in operations like matrix-vector multiplication (SpMV), especially for matrices with a block structure (e.g., arising in finite element methods or structured scientific computing problems).
+## Introduction
+Block Compressed Row Storage (BCRS) is a sparse matrix storage format that extends Compressed Row Storage (CSR) by grouping matrix elements into small dense blocks. This improves cache efficiency and performance, particularly for structured matrices found in scientific computing.
 
-### **Key Features of BCRS**
-1. **Blocks Instead of Individual Elements**  
-   - Unlike CSR, which stores individual nonzero elements, BCRS stores small dense blocks (e.g., 2×2, 4×4) instead.
-   - This reduces the overhead of index storage and improves data locality.
+---
 
-2. **Data Structure**  
-   Similar to CSR, BCRS consists of:
-   - **Values (`val`)**: Stores dense blocks row-wise.
-   - **Column Indices (`col_ind`)**: Indicates the column index of each block.
-   - **Row Pointers (`row_ptr`)**: Points to the start of each row in `val`.
+## Key Features
+- **Efficient storage of block-structured sparse matrices**
+- **Reduces indexing overhead** compared to CSR
+- **Improves cache locality** by storing data in contiguous blocks
+- **Optimized for structured scientific computing problems**
 
-3. **Advantages**  
-   - **Cache Efficiency**: Since data is stored in contiguous memory blocks, CPU cache utilization improves.
-   - **Reduced Storage Overhead**: Fewer column indices need to be stored compared to CSR.
-   - **Optimized for Blocked Matrices**: Works best when nonzero elements are naturally clustered in blocks.
+---
 
-4. **Disadvantages**  
-   - **Padding Overhead**: If blocks contain zero entries, extra storage is used.
-   - **Not Suitable for Arbitrary Sparsity Patterns**: If the matrix lacks a block structure, CSR may be more efficient.
-
-### **Example: Converting a Sparse Matrix to BCRS**
-Consider a **6×6** sparse matrix with **2×2** block storage:
-
-#### **Matrix Representation**
-
+## Example Matrix (6×6 Sparse Matrix)
+```
 | 1  0  2  0  0  0 |
 | 0  3  0  4  0  0 |
 | 5  0  6  0  0  7 |
 | 0  8  0  9 10  0 |
 | 0  0 11  0 12  0 |
 | 0  0  0 13  0 14 |
+```
+- **Nonzero elements**: 12
+- **Block size**: 2×2
+
+---
+
+## Storage in CSR Format
+CSR stores:
+1. **Values (`val`)**: Stores all 12 nonzero elements.
+2. **Column Indices (`col_ind`)**: One index per nonzero.
+3. **Row Pointers (`row_ptr`)**: One pointer per row.
+
+### **CSR Storage Size** (in terms of elements)
+- **Values**: `12`
+- **Column Indices**: `12`
+- **Row Pointers**: `7`
+- **Total Storage**: `12 + 12 + 7 = 31` elements
+
+---
+
+## Storage in BCRS Format (2×2 Blocks)
+### **Block Partitioning**
+```
+| (1,0,0,3) | (2,0,0,4) | (0,0,0,0) |
+| (5,0,0,8) | (6,0,0,9) | (0,0,7,10) |
+| (0,0,11,0) | (0,0,12,0) | (0,13,0,14) |
+```
+Each block is stored as a **dense** 2×2 matrix.
+
+### **BCRS Storage Size** (in terms of elements)
+- **Values (`val`)**: `7 × 4 = 28`
+- **Column Indices (`col_ind`)**: `7`
+- **Row Pointers (`row_ptr`)**: `4`
+- **Total Storage**: `28 + 7 + 4 = 39` elements
+
+---
+
+## Comparison: CSR vs BCRS
+| Format | Values | Column Indices | Row Pointers | Total Storage |
+|--------|--------|---------------|--------------|--------------|
+| **CSR** | 12 | 12 | 7 | **31 elements** |
+| **BCRS (2×2)** | 28 | 7 | 4 | **39 elements** |
+
+### **Key Observations**
+- **BCRS requires more storage** due to block padding.
+- **BCRS improves performance** for structured matrices by reducing index overhead.
+- **If the matrix lacks a natural block structure, CSR is better.**
+
+---
+
+## When to Use BCRS?
+✅ Use BCRS if:
+- The matrix has a **natural block structure** (e.g., FEM, CFD problems).
+- Optimizing **matrix-vector multiplication (SpMV)** performance.
+- **Reducing indexing overhead** is important.
+
+❌ Avoid BCRS if:
+- The matrix has **arbitrary sparsity patterns**.
+- Memory efficiency is a higher priority than computation speed.
+
+---
 
 
-#### **BCRS Storage (Block size = 2×2)**
-- **Values (`val`)**:
-  [ [1 0] [0 3] [2 0] [0 4]
-    [5 0] [0 8] [6 0] [0 9]
-    [0 0] [11 0] [10 0] [12 0]
-    [0 13] [0 14] ]
-
-  
-- **Column Indices (`col_ind`)**: `[0, 1, 0, 1, 2, 2, 1]`
-- **Row Pointers (`row_ptr`)**: `[0, 2, 4, 7]`
-
-### **Use Cases**
-- Finite Element Methods (FEM)
-- Computational Fluid Dynamics (CFD)
-- Block-structured sparse matrices in scientific computing
-
-Would you like a C implementation for BCRS?
