@@ -99,4 +99,58 @@ Here, `*` represents unused space.
 - **Better Performance**: Useful for matrix operations in iterative solvers (e.g., LU decomposition, Gauss-Seidel method).
 - **Cache-Friendly**: Improves cache locality in numerical computations.
 
-Would you like an implementation in C or Python for handling Packed Diagonal Storage?
+
+# Block Compressed Row Storage
+
+Block Compressed Row Storage (BCRS) is a sparse matrix storage format that extends the **Compressed Row Storage (CRS/CSR)** format by grouping matrix elements into small dense blocks. This improves cache efficiency and performance in operations like matrix-vector multiplication (SpMV), especially for matrices with a block structure (e.g., arising in finite element methods or structured scientific computing problems).
+
+### **Key Features of BCRS**
+1. **Blocks Instead of Individual Elements**  
+   - Unlike CSR, which stores individual nonzero elements, BCRS stores small dense blocks (e.g., 2×2, 4×4) instead.
+   - This reduces the overhead of index storage and improves data locality.
+
+2. **Data Structure**  
+   Similar to CSR, BCRS consists of:
+   - **Values (`val`)**: Stores dense blocks row-wise.
+   - **Column Indices (`col_ind`)**: Indicates the column index of each block.
+   - **Row Pointers (`row_ptr`)**: Points to the start of each row in `val`.
+
+3. **Advantages**  
+   - **Cache Efficiency**: Since data is stored in contiguous memory blocks, CPU cache utilization improves.
+   - **Reduced Storage Overhead**: Fewer column indices need to be stored compared to CSR.
+   - **Optimized for Blocked Matrices**: Works best when nonzero elements are naturally clustered in blocks.
+
+4. **Disadvantages**  
+   - **Padding Overhead**: If blocks contain zero entries, extra storage is used.
+   - **Not Suitable for Arbitrary Sparsity Patterns**: If the matrix lacks a block structure, CSR may be more efficient.
+
+### **Example: Converting a Sparse Matrix to BCRS**
+Consider a **6×6** sparse matrix with **2×2** block storage:
+
+#### **Matrix Representation**
+
+| 1  0  2  0  0  0 |
+| 0  3  0  4  0  0 |
+| 5  0  6  0  0  7 |
+| 0  8  0  9 10  0 |
+| 0  0 11  0 12  0 |
+| 0  0  0 13  0 14 |
+
+
+#### **BCRS Storage (Block size = 2×2)**
+- **Values (`val`)**:
+  [ [1 0] [0 3] [2 0] [0 4]
+    [5 0] [0 8] [6 0] [0 9]
+    [0 0] [11 0] [10 0] [12 0]
+    [0 13] [0 14] ]
+
+  
+- **Column Indices (`col_ind`)**: `[0, 1, 0, 1, 2, 2, 1]`
+- **Row Pointers (`row_ptr`)**: `[0, 2, 4, 7]`
+
+### **Use Cases**
+- Finite Element Methods (FEM)
+- Computational Fluid Dynamics (CFD)
+- Block-structured sparse matrices in scientific computing
+
+Would you like a C implementation for BCRS?
