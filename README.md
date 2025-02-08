@@ -129,9 +129,9 @@ Consider a **6×6** sparse matrix with **2×2** block storage:
 
 #### **Matrix Representation**
 
-| 1  0  2  0  0  0 |
-| 0  3  0  4  0  0 |
-| 5  0  6  0  0  7 |
+| 1  0  2  0  0  0 |\n
+| 0  3  0  4  0  0 |\n
+| 5  0  6  0  0  7 |\n
 | 0  8  0  9 10  0 |
 | 0  0 11  0 12  0 |
 | 0  0  0 13  0 14 |
